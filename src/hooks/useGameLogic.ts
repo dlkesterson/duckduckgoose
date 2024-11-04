@@ -4,6 +4,31 @@ import { useState, useEffect, useCallback } from 'react';
 import { Animal, Confetti, PopupText, GameState, GameScore, GAME_CONSTANTS } from '../types';
 import { getRandomPosition, getRandomDirection, getRandomDuckSpeed, normalizeDirection } from '../lib/utils';
 
+// Duck variant specific constants
+const VARIANT_CONSTANTS = {
+    SCHOLAR: {
+        BASE_LEARNING_RATE: 0.1,
+        MAX_SPEED_INCREASE: 1.2,
+    },
+    RESCUE: {
+        HEAL_RADIUS: 100,
+        HEAL_RATE: 0.5,
+        SAFE_ZONE_DURATION: 3000,
+    },
+    COWBOY: {
+        SPEED_MULTIPLIER: 1.1,
+        ESCAPE_SKILL: 1.1,
+    },
+    CROWN: {
+        POINT_MULTIPLIER: 1.5,
+        GOOSE_ATTRACTION: 1.2,
+    },
+    WIZARD: {
+        SLOW_RADIUS: 150,
+        SLOW_FACTOR: 0.6,
+    },
+};
+
 export const useGameLogic = () => {
     const [gameState, setGameState] = useState<GameState>('welcome');
     const [animals, setAnimals] = useState<Animal[]>([]);
@@ -86,7 +111,12 @@ export const useGameLogic = () => {
         }
     }, [popupTexts.length]);
 
-    const createPopupText = (text: string) => {
+    const createPopupText = (animal: Animal) => {
+        let text = animal.type.toUpperCase();
+        if (animal.type === 'duck' && animal.variant && animal.variant !== 'normal') {
+            text = `${animal.variant.toUpperCase()} ${text}`;
+        }
+
         const newPopup = {
             id: Date.now(),
             text,
@@ -95,7 +125,6 @@ export const useGameLogic = () => {
         };
         setPopupTexts((prev) => [...prev, newPopup]);
 
-        // Remove popup after animation
         setTimeout(() => {
             setPopupTexts((prev) => prev.filter((p) => p.id !== newPopup.id));
         }, 1000);
@@ -148,12 +177,16 @@ export const useGameLogic = () => {
             speed: canCreateGoose ? GAME_CONSTANTS.BASE_SPEED : getRandomDuckSpeed(),
             opacity: 1,
             health: canCreateGoose ? undefined : GAME_CONSTANTS.INITIAL_DUCK_HEALTH,
-            rotation: Math.random() * 360, // Add random initial rotation
-            panicLevel: 0, // Add panic level for ducks,
+            rotation: Math.random() * 360,
+            panicLevel: 0,
             variant: GAME_CONSTANTS.duckVariants[Math.floor(Math.random() * GAME_CONSTANTS.duckVariants.length)],
+            // Add variant-specific properties
+            learningProgress: 0,
+            safeZoneActive: false,
+            safeZoneTimer: null,
         };
 
-        createPopupText(newAnimal.type.toUpperCase());
+        createPopupText(newAnimal);
         setAnimals((prev) => [...prev, newAnimal]);
     }, [gameState, isResetting, duckCount, gooseCount, isButtonCooldown]);
 
@@ -175,7 +208,7 @@ export const useGameLogic = () => {
         return () => clearInterval(scoreInterval);
     }, [gameState, animals.length]);
 
-    // Movement and collision detection
+    // Movement and collision detection with variant behaviors
     useEffect(() => {
         if (gameState !== 'playing') return;
 
@@ -191,16 +224,65 @@ export const useGameLogic = () => {
                             const dy = nearestGoose.y - animal.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
 
+                            // Apply variant-specific behaviors
+                            switch (animal.variant) {
+                                case 'scholar':
+                                    // Increase learning progress and apply to movement
+                                    animal.learningProgress = (animal.learningProgress || 0) + VARIANT_CONSTANTS.SCHOLAR.BASE_LEARNING_RATE;
+                                    animal.speed *= (1 + Math.min(animal.learningProgress, VARIANT_CONSTANTS.SCHOLAR.MAX_SPEED_INCREASE));
+                                    break;
+
+                                case 'rescue':
+                                    // Heal nearby ducks
+                                    prevAnimals.forEach((nearby) => {
+                                        if (nearby.type === 'duck' && nearby.id !== animal.id) {
+                                            const healDx = nearby.x - animal.x;
+                                            const healDy = nearby.y - animal.y;
+                                            const healDistance = Math.sqrt(healDx * healDx + healDy * healDy);
+
+                                            if (healDistance < VARIANT_CONSTANTS.RESCUE.HEAL_RADIUS && nearby.health) {
+                                                nearby.health = Math.min(100, nearby.health + VARIANT_CONSTANTS.RESCUE.HEAL_RATE);
+                                            }
+                                        }
+                                    });
+                                    break;
+
+                                case 'cowboy':
+                                    // Enhanced speed and escape ability
+                                    animal.speed *= VARIANT_CONSTANTS.COWBOY.SPEED_MULTIPLIER;
+                                    if (distance < GAME_CONSTANTS.FLEE_DISTANCE) {
+                                        animal.speed *= VARIANT_CONSTANTS.COWBOY.ESCAPE_SKILL;
+                                    }
+                                    break;
+
+                                case 'crown':
+                                    // Attract goose more but generate bonus points
+                                    if (typeof animal.health === 'number' && animal.health > 0) {
+                                        setScore((prev) => prev + (1 * VARIANT_CONSTANTS.CROWN.POINT_MULTIPLIER) / 60);
+                                    }
+                                    break;
+
+                                case 'wizard':
+                                    // Slow down nearby goose
+                                    if (distance < VARIANT_CONSTANTS.WIZARD.SLOW_RADIUS) {
+                                        nearestGoose.speed *= VARIANT_CONSTANTS.WIZARD.SLOW_FACTOR;
+                                    }
+                                    break;
+                            }
+
                             // Update panic level based on proximity to goose
                             panicLevel = Math.max(0, 1 - (distance / GAME_CONSTANTS.FLEE_DISTANCE));
 
                             if (distance < GAME_CONSTANTS.DAMAGE_RADIUS && typeof animal.health === 'number') {
-                                const newHealth = animal.health - GAME_CONSTANTS.DAMAGE_RATE / 60;
-                                if (newHealth <= 0) {
-                                    resetGame();
-                                    return animal;
+                                // Apply damage unless in safe zone
+                                if (!animal.safeZoneActive) {
+                                    const newHealth = animal.health - GAME_CONSTANTS.DAMAGE_RATE / 60;
+                                    if (newHealth <= 0) {
+                                        resetGame();
+                                        return animal;
+                                    }
+                                    animal.health = Math.max(0, newHealth);
                                 }
-                                animal.health = Math.max(0, newHealth);
                             }
 
                             if (distance < GAME_CONSTANTS.FLEE_DISTANCE) {
@@ -212,15 +294,18 @@ export const useGameLogic = () => {
                             }
                         }
 
-                        // Add some random rotation during panic
-                        const panicRotation = panicLevel * (Math.random() - 0.5) * 30;
-                        animal.rotation = (animal.rotation || 0) + panicRotation;
+                        animal.rotation = (animal.rotation || 0) + (panicLevel * (Math.random() - 0.5) * 30);
                         animal.panicLevel = panicLevel;
                     } else if (animal.type === 'goose' && chaseMode) {
-                        const nearestDuck = prevAnimals.find((a) => a.type === 'duck');
-                        if (nearestDuck) {
-                            const dx = nearestDuck.x - animal.x;
-                            const dy = nearestDuck.y - animal.y;
+                        // Goose targeting logic with crown duck preference
+                        const targets = prevAnimals.filter((a) => a.type === 'duck');
+                        const crownDucks = targets.filter((d) => d.variant === 'crown');
+
+                        const target = crownDucks.length > 0 ? crownDucks[0] : targets[0];
+
+                        if (target) {
+                            const dx = target.x - animal.x;
+                            const dy = target.y - animal.y;
                             animal.direction = normalizeDirection({ x: dx, y: dy });
                         }
                     }
@@ -249,7 +334,7 @@ export const useGameLogic = () => {
 
                 return updatedAnimals;
             });
-        }, 1000 / 60); // 60 FPS
+        }, 1000 / 60);
 
         return () => clearInterval(gameLoop);
     }, [gameState, chaseMode]);

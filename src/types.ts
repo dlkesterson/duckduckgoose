@@ -29,10 +29,15 @@ export interface Animal {
     };
     speed: number;
     opacity: number;
-    health?: number; // Added for ducks
+    health?: number;
     rotation?: number;
-    panicLevel?: number;
+    panicLevel: number;
     variant?: DuckVariant;
+
+    // New variant-specific properties
+    learningProgress?: number;      // For Scholar Duck: tracks learning progress
+    safeZoneActive?: boolean;       // For Rescue Duck: indicates if safe zone is active
+    safeZoneTimer?: number | null;  // For Rescue Duck: tracks safe zone duration
 }
 
 export interface Confetti {
