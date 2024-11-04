@@ -12,6 +12,27 @@ export const GAME_CONSTANTS = {
     DAMAGE_RATE: 20, // Damage per second when in range
     POINTS_PER_SECOND: 10, // Points earned per second per healthy duck,
     duckVariants: ['normal', 'cowboy', 'rescue', 'scholar', 'crown', 'wizard'] as const,
+    SCHOLAR: {
+        BASE_LEARNING_RATE: 0.1,
+        MAX_SPEED_INCREASE: 1.5,
+    },
+    RESCUE: {
+        HEAL_RADIUS: 100,
+        HEAL_RATE: 0.5,
+        SAFE_ZONE_DURATION: 3000,
+    },
+    COWBOY: {
+        SPEED_MULTIPLIER: 1.02,
+        ESCAPE_SKILL: 1.02,
+    },
+    CROWN: {
+        POINT_MULTIPLIER: 1.5,
+        GOOSE_ATTRACTION: 1.05,
+    },
+    WIZARD: {
+        SLOW_RADIUS: 150,
+        SLOW_FACTOR: 0.6,
+    },
     GOOSE: {
         FORCE_PULL_RADIUS: 50, // Radius of gravitational pull
         FORCE_PULL_STRENGTH: 0.5, // Strength of pull (0-1)

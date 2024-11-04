@@ -4,42 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Animal, Confetti, PopupText, GameState, GameScore, GAME_CONSTANTS } from '../types';
 import { getRandomPosition, getRandomDirection, getRandomDuckSpeed, normalizeDirection } from '../lib/utils';
 
-// Duck variant specific constants
-const VARIANT_CONSTANTS = {
-    SCHOLAR: {
-        BASE_LEARNING_RATE: 0.1,
-        MAX_SPEED_INCREASE: 1.5,
-    },
-    RESCUE: {
-        HEAL_RADIUS: 100,
-        HEAL_RATE: 0.5,
-        SAFE_ZONE_DURATION: 3000,
-    },
-    COWBOY: {
-        SPEED_MULTIPLIER: 1.02,
-        ESCAPE_SKILL: 1.02,
-    },
-    CROWN: {
-        POINT_MULTIPLIER: 1.5,
-        GOOSE_ATTRACTION: 1.05,
-    },
-    WIZARD: {
-        SLOW_RADIUS: 150,
-        SLOW_FACTOR: 0.6,
-    },
-};
-
-const GOOSE_CONSTANTS = {
-    FORCE_PULL_RADIUS: 50, // Radius of gravitational pull
-    FORCE_PULL_STRENGTH: 0.5, // Strength of pull (0-1)
-    BURST_SPEED_MULTIPLIER: 2.5, // Speed multiplier during burst
-    BURST_DURATION: 1500, // Duration of speed burst in ms
-    BURST_COOLDOWN: 3000, // Cooldown between bursts in ms
-    SIZE_GROWTH_RATE: 0.001, // How much the goose grows per second
-    MAX_SIZE: 2, // Maximum size multiplier for the goose
-    INITIAL_SIZE: 1.2, // Starting size multiplier
-};
-
 export const useGameLogic = () => {
     const [gameState, setGameState] = useState<GameState>('welcome');
     const [animals, setAnimals] = useState<Animal[]>([]);
@@ -51,7 +15,7 @@ export const useGameLogic = () => {
     const [highScores, setHighScores] = useState<GameScore[]>([]);
     const [isButtonCooldown, setIsButtonCooldown] = useState(false);
     const [goosePowers, setGoosePowers] = useState({
-        size: GOOSE_CONSTANTS.INITIAL_SIZE,
+        size: GAME_CONSTANTS.GOOSE.INITIAL_SIZE,
         isBursting: false,
         lastBurstTime: 0,
     });
@@ -253,9 +217,9 @@ export const useGameLogic = () => {
                             const distance = Math.sqrt(dx * dx + dy * dy);
 
                             // Apply force pull effect if duck is within radius
-                            if (distance < GOOSE_CONSTANTS.FORCE_PULL_RADIUS) {
-                                const pullStrength = GOOSE_CONSTANTS.FORCE_PULL_STRENGTH *
-                                    (1 - distance / GOOSE_CONSTANTS.FORCE_PULL_RADIUS);
+                            if (distance < GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS) {
+                                const pullStrength = GAME_CONSTANTS.GOOSE.FORCE_PULL_STRENGTH *
+                                    (1 - distance / GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS);
                                 animal.x += dx * pullStrength * 0.016; // 0.016 is roughly 1/60 for 60fps
                                 animal.y += dy * pullStrength * 0.016;
                             }
@@ -264,8 +228,8 @@ export const useGameLogic = () => {
                             switch (animal.variant) {
                                 case 'scholar':
                                     // Increase learning progress and apply to movement
-                                    animal.learningProgress = (animal.learningProgress || 0) + VARIANT_CONSTANTS.SCHOLAR.BASE_LEARNING_RATE;
-                                    animal.speed *= (1 + Math.min(animal.learningProgress, VARIANT_CONSTANTS.SCHOLAR.MAX_SPEED_INCREASE));
+                                    animal.learningProgress = (animal.learningProgress || 0) + GAME_CONSTANTS.SCHOLAR.BASE_LEARNING_RATE;
+                                    animal.speed *= (1 + Math.min(animal.learningProgress, GAME_CONSTANTS.SCHOLAR.MAX_SPEED_INCREASE));
                                     break;
 
                                 case 'rescue':
@@ -276,8 +240,8 @@ export const useGameLogic = () => {
                                             const healDy = nearby.y - animal.y;
                                             const healDistance = Math.sqrt(healDx * healDx + healDy * healDy);
 
-                                            if (healDistance < VARIANT_CONSTANTS.RESCUE.HEAL_RADIUS && nearby.health) {
-                                                nearby.health = Math.min(100, nearby.health + VARIANT_CONSTANTS.RESCUE.HEAL_RATE);
+                                            if (healDistance < GAME_CONSTANTS.RESCUE.HEAL_RADIUS && nearby.health) {
+                                                nearby.health = Math.min(100, nearby.health + GAME_CONSTANTS.RESCUE.HEAL_RATE);
                                             }
                                         }
                                     });
@@ -285,23 +249,23 @@ export const useGameLogic = () => {
 
                                 case 'cowboy':
                                     // Enhanced speed and escape ability
-                                    animal.speed *= VARIANT_CONSTANTS.COWBOY.SPEED_MULTIPLIER;
+                                    animal.speed *= GAME_CONSTANTS.COWBOY.SPEED_MULTIPLIER;
                                     if (distance < GAME_CONSTANTS.FLEE_DISTANCE) {
-                                        animal.speed *= VARIANT_CONSTANTS.COWBOY.ESCAPE_SKILL;
+                                        animal.speed *= GAME_CONSTANTS.COWBOY.ESCAPE_SKILL;
                                     }
                                     break;
 
                                 case 'crown':
                                     // Attract goose more but generate bonus points
                                     if (typeof animal.health === 'number' && animal.health > 0) {
-                                        setScore((prev) => prev + (1 * VARIANT_CONSTANTS.CROWN.POINT_MULTIPLIER) / 60);
+                                        setScore((prev) => prev + (1 * GAME_CONSTANTS.CROWN.POINT_MULTIPLIER) / 60);
                                     }
                                     break;
 
                                 case 'wizard':
                                     // Slow down nearby goose
-                                    if (distance < VARIANT_CONSTANTS.WIZARD.SLOW_RADIUS) {
-                                        nearestGoose.speed *= VARIANT_CONSTANTS.WIZARD.SLOW_FACTOR;
+                                    if (distance < GAME_CONSTANTS.WIZARD.SLOW_RADIUS) {
+                                        nearestGoose.speed *= GAME_CONSTANTS.WIZARD.SLOW_FACTOR;
                                     }
                                     break;
                             }
@@ -350,7 +314,7 @@ export const useGameLogic = () => {
                         // Update goose size over time
                         setGoosePowers(prev => ({
                             ...prev,
-                            size: Math.min(prev.size + GOOSE_CONSTANTS.SIZE_GROWTH_RATE, GOOSE_CONSTANTS.MAX_SIZE)
+                            size: Math.min(prev.size + GAME_CONSTANTS.GOOSE.SIZE_GROWTH_RATE, GAME_CONSTANTS.GOOSE.MAX_SIZE)
                         }));
 
                         // Goose targeting logic
@@ -366,17 +330,17 @@ export const useGameLogic = () => {
                             // Apply speed burst if available
                             const currentTime = Date.now();
                             if (!goosePowers.isBursting &&
-                                currentTime - goosePowers.lastBurstTime > GOOSE_CONSTANTS.BURST_COOLDOWN) {
+                                currentTime - goosePowers.lastBurstTime > GAME_CONSTANTS.GOOSE.BURST_COOLDOWN) {
                                 setGoosePowers(prev => ({ ...prev, isBursting: true, lastBurstTime: currentTime }));
                                 setTimeout(() => {
                                     setGoosePowers(prev => ({ ...prev, isBursting: false }));
-                                }, GOOSE_CONSTANTS.BURST_DURATION);
+                                }, GAME_CONSTANTS.GOOSE.BURST_DURATION);
                             }
                         }
 
                         // Apply speed modifications
                         animal.speed = GAME_CONSTANTS.BASE_SPEED * (
-                            goosePowers.isBursting ? GOOSE_CONSTANTS.BURST_SPEED_MULTIPLIER : 1
+                            goosePowers.isBursting ? GAME_CONSTANTS.GOOSE.BURST_SPEED_MULTIPLIER : 1
                         );
                     }
 
