@@ -308,8 +308,19 @@ export const useGameLogic = () => {
 
 
 
-                            // Update panic level based on proximity to goose
-                            panicLevel = Math.max(0, 1 - (distance / GAME_CONSTANTS.FLEE_DISTANCE));
+                            // Update panic level with smoothing
+                            const targetPanicLevel = Math.max(0, 1 - (distance / GAME_CONSTANTS.FLEE_DISTANCE));
+                            // Smooth transition between panic levels (0.1 is the smoothing factor)
+                            panicLevel = animal.panicLevel + (targetPanicLevel - animal.panicLevel) * 0.1;
+
+                            // Limit rotation speed based on distance
+                            const maxRotationSpeed = 15; // Maximum degrees per frame
+                            const rotationSpeed = panicLevel * maxRotationSpeed;
+
+                            // Smoothly interpolate rotation
+                            const targetRotation = (animal.rotation || 0) + (rotationSpeed * (Math.random() - 0.5));
+                            animal.rotation = (animal.rotation || 0) +
+                                (targetRotation - (animal.rotation || 0)) * 0.1; // Smooth rotation transition
 
                             // Increase damage radius based on goose size
                             const scaledDamageRadius = GAME_CONSTANTS.DAMAGE_RADIUS * goosePowers.size;
