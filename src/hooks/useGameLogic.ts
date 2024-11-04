@@ -37,7 +37,7 @@ export const useGameLogic = () => {
         };
         const updatedScores = [...highScores, newHighScore]
             .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
+            .slice(0, 4);
         setHighScores(updatedScores);
         localStorage.setItem('duckGameHighScores', JSON.stringify(updatedScores));
     };

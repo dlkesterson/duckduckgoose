@@ -101,7 +101,7 @@ const DuckGooseGame = () => {
 			</div>
 
 			{gameState === 'gameover' && (
-				<div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center bg-white p-8 rounded-lg shadow-lg'>
+				<div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center bg-white p-8 w-10/12 rounded-lg shadow-lg'>
 					<h2 className='text-3xl font-bold mb-4'>Game Over!</h2>
 					<p className='text-xl mb-4'>
 						Final Score: {Math.floor(score)}
