@@ -11,12 +11,28 @@ export const GAME_CONSTANTS = {
     DAMAGE_RADIUS: 100, // Distance at which ducks start taking damage
     DAMAGE_RATE: 20, // Damage per second when in range
     POINTS_PER_SECOND: 10, // Points earned per second per healthy duck,
-    duckVariants: ['normal', 'cowboy', 'rescue', 'scholar', 'crown', 'wizard'] as const
+    duckVariants: ['normal', 'cowboy', 'rescue', 'scholar', 'crown', 'wizard'] as const,
+    GOOSE: {
+        FORCE_PULL_RADIUS: 200,
+        FORCE_PULL_STRENGTH: 0.5,
+        BURST_SPEED_MULTIPLIER: 2.5,
+        BURST_DURATION: 1500,
+        BURST_COOLDOWN: 3000,
+        SIZE_GROWTH_RATE: 0.001,
+        MAX_SIZE: 2,
+        INITIAL_SIZE: 1.2,
+    }
 };
 
 export type GameState = 'welcome' | 'playing' | 'gameover';
 
 type DuckVariant = typeof GAME_CONSTANTS.duckVariants[number];
+
+export interface GoosePowers {
+    size: number;
+    isBursting: boolean;
+    lastBurstTime: number;
+}
 
 export interface Animal {
     id: number;
@@ -34,10 +50,15 @@ export interface Animal {
     panicLevel: number;
     variant?: DuckVariant;
 
-    // New variant-specific properties
-    learningProgress?: number;      // For Scholar Duck: tracks learning progress
-    safeZoneActive?: boolean;       // For Rescue Duck: indicates if safe zone is active
-    safeZoneTimer?: number | null;  // For Rescue Duck: tracks safe zone duration
+    // New goose-specific properties
+    size?: number;
+    isBursting?: boolean;
+    pullRadius?: number;
+
+    // Existing variant-specific properties
+    learningProgress?: number;
+    safeZoneActive?: boolean;
+    safeZoneTimer?: number | null;
 }
 
 export interface Confetti {

@@ -1,4 +1,4 @@
-import { Animal, Confetti, PopupText } from '../types';
+import { Animal, Confetti, GAME_CONSTANTS, PopupText } from '../types';
 
 export const ConfettiParticle = ({ particle }: { particle: Confetti }) => (
 	<div
@@ -95,18 +95,48 @@ export const GameAnimal = ({
 			opacity: animal.opacity,
 		};
 
-		if (animal.type === 'goose' && chaseMode) {
+		if (animal.type === 'goose') {
+			const scale = animal.size || GAME_CONSTANTS.GOOSE.INITIAL_SIZE;
+			const glowColor = animal.isBursting
+				? 'rgba(255, 0, 0, 0.8)'
+				: 'rgba(255, 0, 0, 0.5)';
 			return {
 				...baseStyle,
-				filter: 'drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))',
+				transform: `scale(${scale})`,
+				filter: chaseMode
+					? `drop-shadow(0 0 10px ${glowColor})`
+					: undefined,
+				transition: isResetting
+					? 'opacity 1s'
+					: 'transform 0.3s ease-out',
 			};
 		}
 
 		return baseStyle;
 	};
 
+	const getPullEffectStyle = () => {
+		if (animal.type === 'goose' && chaseMode) {
+			return {
+				position: 'absolute',
+				left: -GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS,
+				top: -GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS,
+				width: GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS * 2,
+				height: GAME_CONSTANTS.GOOSE.FORCE_PULL_RADIUS * 2,
+				borderRadius: '50%',
+				border: '2px solid rgba(255, 0, 0, 0.2)',
+				pointerEvents: 'none' as const,
+			};
+		}
+		return null;
+	};
+
 	return (
 		<div className='absolute transform' style={getAnimalStyle()}>
+			{/* Pull effect radius indicator */}
+			{getPullEffectStyle() && <div style={getPullEffectStyle()} />}
+
+			{/* Health bar for ducks */}
 			{animal.type === 'duck' && animal.health !== undefined && (
 				<div className='absolute left-1/2 transform -translate-x-1/2 -top-4 w-8'>
 					<div className='h-1 w-full bg-gray-200 rounded'>
@@ -118,6 +148,11 @@ export const GameAnimal = ({
 						/>
 					</div>
 				</div>
+			)}
+
+			{/* Speed burst indicator for goose */}
+			{animal.type === 'goose' && animal.isBursting && (
+				<div className='absolute -inset-2 animate-ping rounded-full bg-red-500 opacity-30' />
 			)}
 
 			<div
@@ -136,7 +171,7 @@ export const GameAnimal = ({
 						scale={1}
 					/>
 				) : (
-					'🦢'
+					<div className='text-3xl transform'>🦢</div>
 				)}
 			</div>
 		</div>

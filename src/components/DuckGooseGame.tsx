@@ -15,6 +15,7 @@ const DuckGooseGame = () => {
 		highScores,
 		handleClick,
 		isButtonCooldown,
+		goosePowers,
 	} = useGameLogic();
 
 	return (
@@ -30,20 +31,37 @@ const DuckGooseGame = () => {
 				<PopupMessage key={popup.id} popup={popup} />
 			))}
 
+			{/* Game animals */}
 			{animals.map((animal) => (
 				<GameAnimal
 					key={animal.id}
-					animal={animal}
+					animal={{
+						...animal,
+						size:
+							animal.type === 'goose'
+								? goosePowers.size
+								: undefined,
+						isBursting:
+							animal.type === 'goose'
+								? goosePowers.isBursting
+								: undefined,
+					}}
 					chaseMode={chaseMode}
 					isResetting={isResetting}
 				/>
 			))}
 
+			{/* Game stats */}
 			<div className='absolute top-4 left-4 space-y-2'>
 				<div className='text-lg font-medium'>Ducks: {duckCount}</div>
 				<div className='text-lg font-medium'>
 					Score: {Math.floor(score)}
 				</div>
+				{chaseMode && (
+					<div className='text-lg font-medium text-red-600'>
+						Goose Power: {Math.floor(goosePowers.size * 100)}%
+					</div>
+				)}
 			</div>
 
 			{gameState === 'welcome' && (
