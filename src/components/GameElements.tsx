@@ -115,7 +115,7 @@ export const GameAnimal = ({
 		return baseStyle;
 	};
 
-	const getPullEffectStyle = () => {
+	const getPullEffectStyle = (): React.CSSProperties | undefined => {
 		if (animal.type === 'goose' && chaseMode) {
 			return {
 				position: 'absolute',
@@ -128,13 +128,15 @@ export const GameAnimal = ({
 				pointerEvents: 'none' as const,
 			};
 		}
-		return null;
+		return undefined;
 	};
 
 	return (
 		<div className='absolute transform' style={getAnimalStyle()}>
 			{/* Pull effect radius indicator */}
-			{getPullEffectStyle() && <div style={getPullEffectStyle()} />}
+			{animal.type === 'goose' && chaseMode && (
+				<div style={getPullEffectStyle()} />
+			)}
 
 			{/* Health bar for ducks */}
 			{animal.type === 'duck' && animal.health !== undefined && (
