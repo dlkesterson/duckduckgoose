@@ -28,6 +28,49 @@ export const PopupMessage = ({ popup }: { popup: PopupText }) => (
 	</div>
 );
 
+const CustomDuck = ({
+	type = 'normal',
+	direction = 0,
+	panicLevel = 0,
+	scale = 1,
+}: {
+	type: 'normal' | 'cowboy' | 'cool' | 'crown' | 'wizard';
+	direction: number;
+	panicLevel: number;
+	scale: number;
+}) => {
+	// Define duck variants and their emoji combinations
+	const duckTypes = {
+		normal: { body: '🦆', accessory: null },
+		cowboy: { body: '🦆', accessory: '🤠' },
+		cool: { body: '🦆', accessory: '😎' },
+		crown: { body: '🦆', accessory: '👑' },
+		wizard: { body: '🦆', accessory: '🎩' },
+	};
+
+	const selected = duckTypes[type] || duckTypes.normal;
+
+	return (
+		<div
+			className='relative inline-block'
+			style={{
+				transform: `rotate(${direction}deg) scale(${
+					scale + panicLevel * 0.2
+				})`,
+			}}>
+			{/* Duck body */}
+			<div className='text-2xl'>{selected.body}</div>
+
+			{/* Accessory positioned above the duck */}
+			{selected.accessory && (
+				<div className='absolute -top-2 left-1/2 -translate-x-1/2 text-sm transform-gpu'>
+					{selected.accessory}
+				</div>
+			)}
+		</div>
+	);
+};
+
 export const GameAnimal = ({
 	animal,
 	chaseMode,
@@ -79,24 +122,21 @@ export const GameAnimal = ({
 			<div
 				className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform ${
 					chaseMode && animal.type === 'duck' ? 'text-red-500' : ''
-				}`}
-				style={{
-					fontSize: animal.type === 'duck' ? '1.25rem' : '2.5rem',
-					transform: `rotate(${
-						Math.atan2(animal.direction.y, animal.direction.x) *
-							(180 / Math.PI) +
-						(animal.rotation || 0)
-					}deg) scale(${
-						animal.type === 'duck'
-							? 1 + (animal.panicLevel || 0) * 0.2
-							: 1.2
-					})`,
-					filter:
-						animal.type === 'goose' && chaseMode
-							? 'brightness(1.2)'
-							: 'none',
-				}}>
-				{animal.type === 'duck' ? '🦆' : '🦢'}
+				}`}>
+				{animal.type === 'duck' ? (
+					<CustomDuck
+						type={animal.variant || 'normal'}
+						direction={
+							Math.atan2(animal.direction.y, animal.direction.x) *
+								(180 / Math.PI) +
+							(animal.rotation || 0)
+						}
+						panicLevel={animal.panicLevel || 0}
+						scale={1}
+					/>
+				) : (
+					'🦢'
+				)}
 			</div>
 		</div>
 	);

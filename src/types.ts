@@ -10,10 +10,13 @@ export const GAME_CONSTANTS = {
     INITIAL_DUCK_HEALTH: 100,
     DAMAGE_RADIUS: 100, // Distance at which ducks start taking damage
     DAMAGE_RATE: 20, // Damage per second when in range
-    POINTS_PER_SECOND: 10, // Points earned per second per healthy duck
+    POINTS_PER_SECOND: 10, // Points earned per second per healthy duck,
+    duckVariants: ['normal', 'cowboy', 'cool', 'crown', 'wizard'] as const
 };
 
 export type GameState = 'welcome' | 'playing' | 'gameover';
+
+type DuckVariant = typeof GAME_CONSTANTS.duckVariants[number];
 
 export interface Animal {
     id: number;
@@ -29,6 +32,7 @@ export interface Animal {
     health?: number; // Added for ducks
     rotation?: number;
     panicLevel?: number;
+    variant?: DuckVariant;
 }
 
 export interface Confetti {

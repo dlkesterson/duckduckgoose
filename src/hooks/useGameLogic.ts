@@ -149,7 +149,8 @@ export const useGameLogic = () => {
             opacity: 1,
             health: canCreateGoose ? undefined : GAME_CONSTANTS.INITIAL_DUCK_HEALTH,
             rotation: Math.random() * 360, // Add random initial rotation
-            panicLevel: 0 // Add panic level for ducks
+            panicLevel: 0, // Add panic level for ducks,
+            variant: GAME_CONSTANTS.duckVariants[Math.floor(Math.random() * GAME_CONSTANTS.duckVariants.length)],
         };
 
         createPopupText(newAnimal.type.toUpperCase());
