@@ -16,7 +16,29 @@ const DuckGooseGame = () => {
 		handleClick,
 		isButtonCooldown,
 		goosePowers,
+		lastCaughtDuckVariant,
+		lastCaughtDuckSeconds,
 	} = useGameLogic();
+
+	// Function to get the display name for a duck variant
+	const getDuckVariantDisplayName = (variant: string) => {
+		switch (variant) {
+			case 'normal':
+				return 'Normal Duck';
+			case 'cowboy':
+				return 'Cowboy Duck';
+			case 'scholar':
+				return 'Scholar Duck';
+			case 'crown':
+				return 'Crown Duck';
+			case 'rescue':
+				return 'Rescue Duck';
+			case 'wizard':
+				return 'Wizard Duck';
+			default:
+				return variant;
+		}
+	};
 
 	return (
 		<div
@@ -84,6 +106,22 @@ const DuckGooseGame = () => {
 					<p className='text-xl mb-4'>
 						Final Score: {Math.floor(score)}
 					</p>
+
+					<div className='mb-6'>
+						{/* Display the last caught duck variant */}
+						{lastCaughtDuckVariant ? (
+							<p className='text-lg'>
+								The goose caught a{' '}
+								{getDuckVariantDisplayName(
+									lastCaughtDuckVariant
+								)}{' '}
+								in {lastCaughtDuckSeconds} seconds!
+							</p>
+						) : (
+							<p className='text-lg'>No ducks were caught.</p>
+						)}
+					</div>
+
 					<div className='mb-6'>
 						<h3 className='text-xl font-bold mb-2'>High Scores</h3>
 						<ul>

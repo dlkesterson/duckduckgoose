@@ -55,6 +55,8 @@ export const useGameLogic = () => {
         isBursting: false,
         lastBurstTime: 0,
     });
+    const [lastCaughtDuckVariant, setLastCaughtDuckVariant] = useState<string | null>(null);
+    const [lastCaughtDuckSeconds, setLastCaughtDuckSeconds] = useState<string | null>(null);
 
     // Load high scores
     useEffect(() => {
@@ -149,6 +151,16 @@ export const useGameLogic = () => {
     const resetGame = () => {
         setIsResetting(true);
         setChaseMode(false);
+
+        // Store the last caught duck variant before clearing the animals
+        const lastDuck = animals.find((a) => a.type === 'duck');
+        if (lastDuck && lastDuck.variant) {
+            setLastCaughtDuckVariant(lastDuck.variant);
+            setLastCaughtDuckSeconds(((Date.now() - lastDuck.id) / 1000).toFixed(1));
+        } else {
+            setLastCaughtDuckVariant(null);
+            setLastCaughtDuckSeconds(null);
+        }
 
         setAnimals((prev) =>
             prev.map((animal) => ({
@@ -398,6 +410,8 @@ export const useGameLogic = () => {
         highScores,
         handleClick,
         isButtonCooldown,
-        goosePowers
+        goosePowers,
+        lastCaughtDuckVariant,
+        lastCaughtDuckSeconds
     };
 };
