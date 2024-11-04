@@ -58,10 +58,16 @@ const DuckGooseGame = () => {
 
 		// Handle ordinal suffixes
 		const ordinalRules = new Intl.PluralRules('en', { type: 'ordinal' });
-		const suffixes = {
+
+		type PluralRuleType = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
+
+		// Then update your suffixes object to include all possible values
+		const suffixes: Record<PluralRuleType, string> = {
+			zero: 'th',
 			one: 'st',
 			two: 'nd',
 			few: 'rd',
+			many: 'th',
 			other: 'th',
 		};
 		const suffix = suffixes[ordinalRules.select(dayOfMonth)];
