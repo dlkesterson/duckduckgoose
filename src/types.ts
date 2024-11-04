@@ -11,7 +11,7 @@ export const GAME_CONSTANTS = {
     DAMAGE_RADIUS: 100, // Distance at which ducks start taking damage
     DAMAGE_RATE: 20, // Damage per second when in range
     POINTS_PER_SECOND: 10, // Points earned per second per healthy duck,
-    duckVariants: ['normal', 'cowboy', 'cool', 'crown', 'wizard'] as const
+    duckVariants: ['normal', 'cowboy', 'rescue', 'scholar', 'crown', 'wizard'] as const
 };
 
 export type GameState = 'welcome' | 'playing' | 'gameover';

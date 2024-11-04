@@ -34,7 +34,7 @@ const CustomDuck = ({
 	panicLevel = 0,
 	scale = 1,
 }: {
-	type: 'normal' | 'cowboy' | 'cool' | 'crown' | 'wizard';
+	type: Animal['variant'];
 	direction: number;
 	panicLevel: number;
 	scale: number;
@@ -43,8 +43,9 @@ const CustomDuck = ({
 	const duckTypes = {
 		normal: { body: '🦆', accessory: null },
 		cowboy: { body: '🦆', accessory: '🤠' },
-		cool: { body: '🦆', accessory: '😎' },
+		scholar: { body: '🦆', accessory: '🎓' },
 		crown: { body: '🦆', accessory: '👑' },
+		rescue: { body: '🦆', accessory: '⛑️' },
 		wizard: { body: '🦆', accessory: '🎩' },
 	};
 
