@@ -59,6 +59,10 @@ export const useGameLogic = () => {
             });
         }
         setConfetti(particles);
+
+        setTimeout(() => {
+            setConfetti([]);
+        }, 3000);
     };
 
     const startGame = () => {
@@ -182,6 +186,33 @@ export const useGameLogic = () => {
         setAnimals((prev) => [...prev, newAnimal]);
     }, [gameState, isResetting, duckCount, gooseCount, isButtonCooldown]);
 
+    // Add confetti animation effect
+    useEffect(() => {
+        if (confetti.length > 0) {
+            const animationFrame = requestAnimationFrame(() => {
+                setConfetti(prevConfetti =>
+                    prevConfetti
+                        .map(particle => ({
+                            ...particle,
+                            x: particle.x + particle.velocity.x,
+                            y: particle.y + particle.velocity.y + 0.5, // Add gravity
+                            velocity: {
+                                x: particle.velocity.x * 0.99, // Add air resistance
+                                y: particle.velocity.y + 0.5 // Add gravity
+                            }
+                        }))
+                        .filter(particle =>
+                            particle.y < window.innerHeight &&
+                            particle.x > 0 &&
+                            particle.x < window.innerWidth
+                        )
+                );
+            });
+
+            return () => cancelAnimationFrame(animationFrame);
+        }
+    }, [confetti]);
+
     // Scoring system
     useEffect(() => {
         if (gameState !== 'playing') return;
@@ -192,10 +223,9 @@ export const useGameLogic = () => {
             );
 
             if (healthyDucks.length > 0) {
-                console.log('updated score', (score + healthyDucks.length))
                 setScore((prev) => prev + healthyDucks.length);
             }
-        }, 1000);
+        }, 500);
 
         return () => clearInterval(scoreInterval);
     }, [gameState, animals.length]);
