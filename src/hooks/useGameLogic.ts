@@ -8,7 +8,7 @@ import { getRandomPosition, getRandomDirection, getRandomDuckSpeed, normalizeDir
 const VARIANT_CONSTANTS = {
     SCHOLAR: {
         BASE_LEARNING_RATE: 0.1,
-        MAX_SPEED_INCREASE: 1.2,
+        MAX_SPEED_INCREASE: 1.5,
     },
     RESCUE: {
         HEAL_RADIUS: 100,
@@ -16,8 +16,8 @@ const VARIANT_CONSTANTS = {
         SAFE_ZONE_DURATION: 3000,
     },
     COWBOY: {
-        SPEED_MULTIPLIER: 1.1,
-        ESCAPE_SKILL: 1.1,
+        SPEED_MULTIPLIER: 1.02,
+        ESCAPE_SKILL: 1.02,
     },
     CROWN: {
         POINT_MULTIPLIER: 1.5,
