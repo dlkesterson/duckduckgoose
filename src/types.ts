@@ -27,6 +27,8 @@ export interface Animal {
     speed: number;
     opacity: number;
     health?: number; // Added for ducks
+    rotation?: number;
+    panicLevel?: number;
 }
 
 export interface Confetti {

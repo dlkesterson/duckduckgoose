@@ -43,16 +43,26 @@ export const GameAnimal = ({
 		return 'bg-red-500';
 	};
 
+	const getAnimalStyle = () => {
+		const baseStyle = {
+			left: animal.x,
+			top: animal.y,
+			transition: isResetting ? 'opacity 1s' : 'none',
+			opacity: animal.opacity,
+		};
+
+		if (animal.type === 'goose' && chaseMode) {
+			return {
+				...baseStyle,
+				filter: 'drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))',
+			};
+		}
+
+		return baseStyle;
+	};
+
 	return (
-		<div
-			className='absolute transform'
-			style={{
-				left: animal.x,
-				top: animal.y,
-				transition: isResetting ? 'opacity 1s' : 'none',
-				opacity: animal.opacity,
-			}}>
-			{/* Health bar for ducks */}
+		<div className='absolute transform' style={getAnimalStyle()}>
 			{animal.type === 'duck' && animal.health !== undefined && (
 				<div className='absolute left-1/2 transform -translate-x-1/2 -top-4 w-8'>
 					<div className='h-1 w-full bg-gray-200 rounded'>
@@ -66,17 +76,25 @@ export const GameAnimal = ({
 				</div>
 			)}
 
-			{/* Animal emoji with rotation */}
 			<div
-				className={`transform -translate-x-1/2 -translate-y-1/2 ${
+				className={`transform -translate-x-1/2 -translate-y-1/2 transition-transform ${
 					chaseMode && animal.type === 'duck' ? 'text-red-500' : ''
 				}`}
 				style={{
 					fontSize: animal.type === 'duck' ? '1.25rem' : '2.5rem',
 					transform: `rotate(${
 						Math.atan2(animal.direction.y, animal.direction.x) *
-						(180 / Math.PI)
-					}deg)`,
+							(180 / Math.PI) +
+						(animal.rotation || 0)
+					}deg) scale(${
+						animal.type === 'duck'
+							? 1 + (animal.panicLevel || 0) * 0.2
+							: 1.2
+					})`,
+					filter:
+						animal.type === 'goose' && chaseMode
+							? 'brightness(1.2)'
+							: 'none',
 				}}>
 				{animal.type === 'duck' ? '🦆' : '🦢'}
 			</div>

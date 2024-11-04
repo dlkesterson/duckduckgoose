@@ -10,7 +10,6 @@ export const useGameLogic = () => {
     const [confetti, setConfetti] = useState<Confetti[]>([]);
     const [popupTexts, setPopupTexts] = useState<PopupText[]>([]);
     const [chaseMode, setChaseMode] = useState(false);
-    const [countdown, setCountdown] = useState(0);
     const [isResetting, setIsResetting] = useState(false);
     const [score, setScore] = useState(0);
     const [highScores, setHighScores] = useState<GameScore[]>([]);
@@ -60,7 +59,6 @@ export const useGameLogic = () => {
         setScore(0);
         setAnimals([]);
         setChaseMode(false);
-        setCountdown(0);
         setIsResetting(false);
     };
 
@@ -106,7 +104,6 @@ export const useGameLogic = () => {
     const resetGame = () => {
         setIsResetting(true);
         setChaseMode(false);
-        setCountdown(0);
 
         setAnimals((prev) =>
             prev.map((animal) => ({
@@ -133,7 +130,7 @@ export const useGameLogic = () => {
         if (isResetting || gameState !== 'playing') return;
 
         setIsButtonCooldown(true);
-        setTimeout(() => setIsButtonCooldown(false), 250); // 250ms cooldown
+        setTimeout(() => setIsButtonCooldown(false), 250);
 
         const shouldBeDuck = duckCount < 2 || Math.random() > 0.2;
         const canCreateGoose = !shouldBeDuck && gooseCount === 0;
@@ -141,7 +138,6 @@ export const useGameLogic = () => {
         if (canCreateGoose) {
             createConfetti();
             setChaseMode(true);
-            setCountdown(10);
         }
 
         const newAnimal: Animal = {
@@ -152,6 +148,8 @@ export const useGameLogic = () => {
             speed: canCreateGoose ? GAME_CONSTANTS.BASE_SPEED : getRandomDuckSpeed(),
             opacity: 1,
             health: canCreateGoose ? undefined : GAME_CONSTANTS.INITIAL_DUCK_HEALTH,
+            rotation: Math.random() * 360, // Add random initial rotation
+            panicLevel: 0 // Add panic level for ducks
         };
 
         createPopupText(newAnimal.type.toUpperCase());
@@ -185,13 +183,16 @@ export const useGameLogic = () => {
                 const updatedAnimals = prevAnimals.map((animal) => {
                     if (animal.type === 'duck') {
                         const nearestGoose = prevAnimals.find((a) => a.type === 'goose');
+                        let panicLevel = 0;
 
                         if (nearestGoose && chaseMode) {
                             const dx = nearestGoose.x - animal.x;
                             const dy = nearestGoose.y - animal.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
 
-                            // Update health if goose is nearby
+                            // Update panic level based on proximity to goose
+                            panicLevel = Math.max(0, 1 - (distance / GAME_CONSTANTS.FLEE_DISTANCE));
+
                             if (distance < GAME_CONSTANTS.DAMAGE_RADIUS && typeof animal.health === 'number') {
                                 const newHealth = animal.health - GAME_CONSTANTS.DAMAGE_RATE / 60;
                                 if (newHealth <= 0) {
@@ -201,7 +202,6 @@ export const useGameLogic = () => {
                                 animal.health = Math.max(0, newHealth);
                             }
 
-                            // Flee from goose
                             if (distance < GAME_CONSTANTS.FLEE_DISTANCE) {
                                 const fleeDirection = normalizeDirection({
                                     x: -dx,
@@ -210,6 +210,11 @@ export const useGameLogic = () => {
                                 animal.direction = fleeDirection;
                             }
                         }
+
+                        // Add some random rotation during panic
+                        const panicRotation = panicLevel * (Math.random() - 0.5) * 30;
+                        animal.rotation = (animal.rotation || 0) + panicRotation;
+                        animal.panicLevel = panicLevel;
                     } else if (animal.type === 'goose' && chaseMode) {
                         const nearestDuck = prevAnimals.find((a) => a.type === 'duck');
                         if (nearestDuck) {
@@ -248,26 +253,12 @@ export const useGameLogic = () => {
         return () => clearInterval(gameLoop);
     }, [gameState, chaseMode]);
 
-    // Countdown timer
-    useEffect(() => {
-        if (countdown > 0) {
-            const timer = setInterval(() => {
-                setCountdown((prev) => prev - 1);
-            }, 1000);
-
-            return () => clearInterval(timer);
-        } else if (countdown === 0 && chaseMode) {
-            setChaseMode(false);
-        }
-    }, [countdown, chaseMode]);
-
     return {
         gameState,
         animals,
         confetti,
         popupTexts,
         chaseMode,
-        countdown,
         isResetting,
         duckCount,
         score,
