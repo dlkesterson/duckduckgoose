@@ -21,7 +21,7 @@ const VARIANT_CONSTANTS = {
     },
     CROWN: {
         POINT_MULTIPLIER: 1.5,
-        GOOSE_ATTRACTION: 1.2,
+        GOOSE_ATTRACTION: 1.05,
     },
     WIZARD: {
         SLOW_RADIUS: 150,
@@ -30,7 +30,7 @@ const VARIANT_CONSTANTS = {
 };
 
 const GOOSE_CONSTANTS = {
-    FORCE_PULL_RADIUS: 200, // Radius of gravitational pull
+    FORCE_PULL_RADIUS: 50, // Radius of gravitational pull
     FORCE_PULL_STRENGTH: 0.5, // Strength of pull (0-1)
     BURST_SPEED_MULTIPLIER: 2.5, // Speed multiplier during burst
     BURST_DURATION: 1500, // Duration of speed burst in ms

@@ -13,14 +13,14 @@ export const GAME_CONSTANTS = {
     POINTS_PER_SECOND: 10, // Points earned per second per healthy duck,
     duckVariants: ['normal', 'cowboy', 'rescue', 'scholar', 'crown', 'wizard'] as const,
     GOOSE: {
-        FORCE_PULL_RADIUS: 200,
-        FORCE_PULL_STRENGTH: 0.5,
-        BURST_SPEED_MULTIPLIER: 2.5,
-        BURST_DURATION: 1500,
-        BURST_COOLDOWN: 3000,
-        SIZE_GROWTH_RATE: 0.001,
-        MAX_SIZE: 2,
-        INITIAL_SIZE: 1.2,
+        FORCE_PULL_RADIUS: 50, // Radius of gravitational pull
+        FORCE_PULL_STRENGTH: 0.5, // Strength of pull (0-1)
+        BURST_SPEED_MULTIPLIER: 2.5, // Speed multiplier during burst
+        BURST_DURATION: 1500, // Duration of speed burst in ms
+        BURST_COOLDOWN: 3000, // Cooldown between bursts in ms
+        SIZE_GROWTH_RATE: 0.001, // How much the goose grows per second
+        MAX_SIZE: 2, // Maximum size multiplier for the goose
+        INITIAL_SIZE: 1.2, // Starting size multiplier
     }
 };
 
